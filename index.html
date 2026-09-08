@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minimal Digital Calendar</title>
+  <style>
+    :root {
+      --bg-color: #E8E6E1;
+      --text-main: #1A1A1A;
+      --text-muted: #8C8C8C;
+      --accent-orange: #FF5500;
+      --dot-empty: #C8C6C1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .calendar-card {
+      width: 90vw;
+      max-width: 500px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .date-number {
+      font-size: clamp(8rem, 20vw, 12rem);
+      font-weight: 700;
+      line-height: 0.85;
+      letter-spacing: -4px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 24px;
+    }
+
+    .month-year {
+      text-transform: uppercase;
+    }
+
+    .month-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .year-number {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .day-name {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0 28px 0;
+    }
+
+    .nav-btn {
+      font-size: 1.25rem;
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    .day-headers {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .day-headers span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .dots-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 14px;
+      justify-items: center;
+    }
+
+    .dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--text-main);
+      transition: background-color 0.3s ease;
+    }
+
+    .dot.today {
+      background-color: var(--accent-orange);
+    }
+
+    .dot.empty {
+      background-color: transparent;
+      border: 2px solid var(--dot-empty);
+    }
+
+    .footer-quote {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calendar-card">
+    <div class="date-number" id="big-date">--</div>
+    
+    <div class="meta-row">
+      <div class="month-year">
+        <div class="month-name" id="month-name">MONTH</div>
+        <div class="year-number" id="year-number">202X</div>
+      </div>
+      <div class="day-name" id="day-name">---</div>
+    </div>
+
+    <div class="controls">
+      <span class="nav-btn">&lt;</span>
+      <span class="nav-btn">&gt;</span>
+    </div>
+
+    <div class="day-headers">
+      <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+    </div>
+
+    <div class="dots-grid" id="dots-grid"></div>
+
+    <div class="footer-quote">Less but better</div>
+  </div>
+
+  <script>
+    function renderCalendar() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+
+      // Automatically set current Date, Month, Year, and Day Name
+      document.getElementById('big-date').textContent = today.getDate();
+      document.getElementById('month-name').textContent = today.toLocaleString('default', { month: 'long' });
+      document.getElementById('year-number').textContent = year;
+      document.getElementById('day-name').textContent = today.toLocaleString('default', { weekday: 'short' });
+
+      const grid = document.getElementById('dots-grid');
+      grid.innerHTML = '';
+
+      // First day of month offset (0 = Monday, 6 = Sunday)
+      const firstDay = new Date(year, month, 1).getDay();
+      const startOffset = (firstDay === 0 ? 6 : firstDay - 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Render offset/empty dots for days before the 1st
+      for (let i = 0; i < startOffset; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot empty';
+        grid.appendChild(dot);
+      }
+
+      // Render dots for each day in the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        
+        // Highlight active day in orange
+        if (day === today.getDate()) {
+          dot.classList.add('today');
+        }
+
+        grid.appendChild(dot);
+      }
+    }
+
+    // Initial render
+    renderCalendar();
+
+    // Automatically refresh date every hour to stay updated
+    setInterval(renderCalendar, 3600000);
+  </script>
+</body>
+</html>
